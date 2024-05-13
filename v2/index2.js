@@ -9,6 +9,8 @@ class Sapper {
     };
 
     init() {
+        this.mainGridEl.style.gridTemplateColumns = `repeat(${Math.sqrt(this.fieldSize)}, 50px)`
+        this.mainGridEl.style.gridTemplateRows = `repeat(${Math.sqrt(this.fieldSize)}, 50px)`
         for (let i = 0; i < this.fieldSize; i++) {
             const divEl = document.createElement('div');
 
@@ -203,5 +205,5 @@ class Sapper {
     };
 }
 
-const sapper = new Sapper(12, 20);
+const sapper = new Sapper(3, 20);
 sapper.run();
