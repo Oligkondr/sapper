@@ -9,8 +9,10 @@ class Sapper {
     };
 
     init() {
-        this.mainGridEl.style.gridTemplateColumns = `repeat(${Math.sqrt(this.fieldSize)}, 50px)`
-        this.mainGridEl.style.gridTemplateRows = `repeat(${Math.sqrt(this.fieldSize)}, 50px)`
+
+        this.mainGridEl.style.gridTemplateColumns = `repeat(${Math.sqrt(this.fieldSize)}, 50px)`;
+        this.mainGridEl.style.gridTemplateRows = `repeat(${Math.sqrt(this.fieldSize)}, 50px)`;
+
         for (let i = 0; i < this.fieldSize; i++) {
             const divEl = document.createElement('div');
 
@@ -18,9 +20,8 @@ class Sapper {
             divEl.id = `cell_${i + 1}`;
             divEl.num = i + 1;
 
-            divEl.addEventListener('click', (event) => this.lmc(event))
-            divEl.addEventListener('contextmenu', (event) => this.rmc(event))
-
+            divEl.addEventListener('click', (event) => this.lmc(event));
+            divEl.addEventListener('contextmenu', (event) => this.rmc(event));
 
             this.mainGridEl.appendChild(divEl);
         }
@@ -33,7 +34,7 @@ class Sapper {
 
         const cellEl = event.target;
         const cell = this.field[cellEl.num];
-        if (cellEl.className !== 'open') {
+        if (cellEl.className !== 'open' && cellEl.className !== 'flag') {
             if (cell.bomb) {
                 this.gameLose();
             } else {
@@ -73,11 +74,22 @@ class Sapper {
             this.field[i] = {};
         }
 
-        for (let i = 0; i < this.bombCount; i++) {
+        // for (let i = 0; i < this.bombCount; i++) {
+        //     const rand = Math.floor(Math.random() * ((this.fieldSize + 1) - 1) + 1);
+        //     this.field[rand] = {
+        //         bomb: true,
+        //     };
+        // }
+
+        let i = 0;
+        while (i < this.bombCount) {
             const rand = Math.floor(Math.random() * ((this.fieldSize + 1) - 1) + 1);
-            this.field[rand] = {
-                bomb: true,
-            };
+            if (!Object.hasOwn(this.field, this.field[rand])) {
+                this.field[rand] = {
+                    bomb: true,
+                };
+                i++;
+            }
         }
     };
 
@@ -102,19 +114,19 @@ class Sapper {
         result.push(
             num + 12,
             num - 12,
-        )
+        );
         if (num % 12 === 0) {
             result.push(
                 num - 1,
                 num + 12 - 1,
                 num - 12 - 1,
-            )
+            );
         } else if ((num + 11) % 12 === 0) {
             result.push(
                 num + 1,
                 num + 12 + 1,
                 num - 12 + 1,
-            )
+            );
         } else {
             result.push(
                 num + 1,
@@ -123,18 +135,18 @@ class Sapper {
                 num + 12 - 1,
                 num - 12 - 1,
                 num - 12 + 1,
-            )
+            );
 
         }
         return result.filter(num => num >= 1 && num <= this.fieldSize);
     };
 
     getCellById(id) {
-        return document.getElementById(`cell_${id}`)
+        return document.getElementById(`cell_${id}`);
     };
 
     openEmpty(cellNum) {
-        this.field[cellNum].open = true
+        this.field[cellNum].open = true;
         for (const num of this.getNearCells(cellNum)) {
             if (this.field[num].open) {
                 continue;
@@ -159,7 +171,7 @@ class Sapper {
             return false;
         }
         for (let i = 1; i <= this.fieldSize; i++) {
-            const cellEl = this.getCellById(i)
+            const cellEl = this.getCellById(i);
             if (cellEl.className === 'closed') {
                 return false;
             }
@@ -187,14 +199,30 @@ class Sapper {
     showCount(cell, count) {
         cell.innerText = count;
         switch (count) {
-            case 1: cell.style.color = 'blue'; break;
-            case 2: cell.style.color = 'green'; break;
-            case 3: cell.style.color = 'red'; break;
-            case 4: cell.style.color = 'purple'; break;
-            case 5: cell.style.color = 'orange'; break;
-            case 6: cell.style.color = 'cyan'; break;
-            case 7: cell.style.color = 'yellow'; break;
-            case 8: cell.style.color = 'black'; break;
+            case 1:
+                cell.style.color = 'blue';
+                break;
+            case 2:
+                cell.style.color = 'green';
+                break;
+            case 3:
+                cell.style.color = 'red';
+                break;
+            case 4:
+                cell.style.color = 'purple';
+                break;
+            case 5:
+                cell.style.color = 'orange';
+                break;
+            case 6:
+                cell.style.color = 'cyan';
+                break;
+            case 7:
+                cell.style.color = 'yellow';
+                break;
+            case 8:
+                cell.style.color = 'black';
+                break;
         }
     };
 
@@ -202,8 +230,19 @@ class Sapper {
         this.init();
         this.bombGenerator();
         this.calculationOfNumbers();
+        // this.showBombs(); // Только для тестов. Показывает бомбы
     };
+
+    showBombs() {
+        for (let i = 1; i <= this.fieldSize; i++) {
+            const cellEl = document.getElementById(`cell_${i}`);
+
+            if (this.field[i].bomb) {
+                cellEl.innerText = '*';
+            }
+        }
+    }; // Только для тестов. Показывает бомбы
 }
 
-const sapper = new Sapper(3, 20);
+const sapper = new Sapper(12, 20);
 sapper.run();
