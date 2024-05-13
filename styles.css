@@ -1,0 +1,38 @@
+.grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, 60px);
+    grid-template-rows: repeat(12, 60px);
+    justify-content: center;
+
+}
+
+div {
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 200%;
+    font-weight: bold;
+}
+
+.closed {
+    background: #d0d0d0;
+}
+
+.open {
+    background: #ffffff;
+    cursor: default;
+}
+
+.flag {
+    background: #4972bd;
+}
+
+.bomb {
+    background: #d73543;
+}
+
+.empty {
+    border: none;
+}
