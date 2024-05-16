@@ -1,7 +1,9 @@
 class Sapper {
-    field = {};
     mainGridEl = document.getElementById('main_grid');
     isGameOver = false;
+    gameProgress = 0;
+    health = 3;
+    field = {};
 
     constructor(fieldSize, bombCount) {
         this.fieldSize = fieldSize ** 2;
@@ -36,7 +38,12 @@ class Sapper {
         const cell = this.field[cellEl.num];
         if (cellEl.className !== 'open' && cellEl.className !== 'flag') {
             if (cell.bomb) {
-                this.gameLose();
+                this.health -= 1;
+                if (this.health === 0) {
+                    this.gameLose();
+                }
+                this.setClass(cellEl, 'bomb');
+                cellEl.innerText = '*';
             } else {
                 this.setClass(cellEl, 'open');
                 if (cell.count) {
@@ -111,34 +118,57 @@ class Sapper {
 
     getNearCells(num) {
         const result = [];
-        result.push(
-            num + 12,
-            num - 12,
-        );
+        // result.push(
+        //     num + 12,
+        //     num - 12,
+        // );
         if (num % 12 === 0) {
             result.push(
-                num - 1,
-                num + 12 - 1,
                 num - 12 - 1,
+                num - 12,
+                -1,
+                num - 1,
+                0,
+                -1,
+                num + 12 - 1,
+                num + 12,
+                -1,
+
+                // num - 1,
+                // num + 12 - 1,
+                // num - 12 - 1,
             );
         } else if ((num + 11) % 12 === 0) {
             result.push(
-                num + 1,
-                num + 12 + 1,
+                -1,
+                num - 12,
                 num - 12 + 1,
+                -1,
+                0,
+                num + 1,
+                -1,
+                num + 12,
+                num + 12 + 1,
+
+                // num + 1,
+                // num + 12 + 1,
+                // num - 12 + 1,
             );
         } else {
             result.push(
-                num + 1,
-                num - 1,
-                num + 12 + 1,
-                num + 12 - 1,
                 num - 12 - 1,
+                num - 12,
                 num - 12 + 1,
+                num - 1,
+                0,
+                num + 1,
+                num + 12 - 1,
+                num + 12,
+                num + 12 + 1,
             );
 
         }
-        return result.filter(num => num >= 1 && num <= this.fieldSize);
+        return result.filter((num) => num >= 1 && num <= this.fieldSize);
     };
 
     getCellById(id) {
@@ -224,6 +254,29 @@ class Sapper {
                 cell.style.color = 'black';
                 break;
         }
+    };
+
+    setCellBg(id) {
+
+    };
+
+    getNearArr(id) {
+        const flat = [];
+        for (const num of getNearCells(id)) {
+
+            // (num === 0 || getCellById(num).className !== 'close') ? flat.push(0) : flat.push(1);
+
+            if (num === 0 || getCellById(num).className !== 'close') {
+                flat.push(0);
+            } else {
+                flat.push(1);
+            }
+        }
+
+        const result = flat.slice(0, 3);
+        result[3] = a.slice(3, 6);
+        result[3][3] = a.slice(-3);
+        return result;
     };
 
     run() {
