@@ -18,7 +18,7 @@ b[3] = a.slice(3, 6);
 b[3][3] = a.slice(-3);
 // console.log(b);
 
-console.log((a.slice(3)));
+// console.log((a.slice(3)));
 
 const result = a.slice(0, 3);
 const second = a.slice(3);
@@ -31,4 +31,9 @@ for (let i = 0; i < second.length; i++) {
         result[3][3].push(second[i]);
     }
 }
-console.log(result);
+// console.log(result);
+
+
+let h = 0.69
+const j = 0.69
+console.log(h += j)

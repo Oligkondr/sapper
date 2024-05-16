@@ -1,19 +1,30 @@
+// divEl есть: className, id, num
+// cellEl
+// cell
+//
+
+
 class Sapper {
     mainGridEl = document.getElementById('main_grid');
+    gameData = document.getElementById('game-data');
     isGameOver = false;
     gameProgress = 0;
-    health = 3;
+    health = 1;
     field = {};
+    fifty = true;
+    seventyFive = true;
+    handEvent = '';
 
-    constructor(fieldSize, bombCount) {
-        this.fieldSize = fieldSize ** 2;
+    constructor(fieldLine, bombCount) {
+        this.fieldLine = fieldLine;
+        this.fieldSize = fieldLine ** 2;
         this.bombCount = bombCount;
     };
 
     init() {
 
-        this.mainGridEl.style.gridTemplateColumns = `repeat(${Math.sqrt(this.fieldSize)}, 50px)`;
-        this.mainGridEl.style.gridTemplateRows = `repeat(${Math.sqrt(this.fieldSize)}, 50px)`;
+        this.mainGridEl.style.gridTemplateColumns = `repeat(${this.fieldLine}, 50px)`;
+        this.mainGridEl.style.gridTemplateRows = `repeat(${this.fieldLine}, 50px)`;
 
         for (let i = 0; i < this.fieldSize; i++) {
             const divEl = document.createElement('div');
@@ -30,6 +41,7 @@ class Sapper {
     };
 
     lmc(event) {
+
         if (this.isGameOver) {
             return false;
         }
@@ -39,9 +51,14 @@ class Sapper {
         if (cellEl.className !== 'open' && cellEl.className !== 'flag') {
             if (cell.bomb) {
                 this.health -= 1;
-                if (this.health === 0) {
+
+                if (this.health < 0) {
+                    this.handEvent = `loose;cell${cellEl.num}`;
                     this.gameLose();
+                } else {
+                    this.handEvent = `boom;cell${cellEl.num}`;
                 }
+
                 this.setClass(cellEl, 'bomb');
                 cellEl.innerText = '*';
             } else {
@@ -53,7 +70,20 @@ class Sapper {
                 }
             }
         }
-        this.checkWin();
+
+        this.getProgress();
+
+        if (this.checkWin()) {
+            this.handEvent = 'win';
+        }
+
+        console.log(Math.ceil(this.gameProgress)); // Показывает прогресс
+        console.log(this.health); // Показывает "здоровье"
+
+        this.gameData.setAttribute('cells-closed', `${Math.ceil(this.gameProgress)}`);
+        this.gameData.setAttribute('event', `${this.handEvent}`);
+        this.gameData.setAttribute('curr-health', `${this.health}`);
+        // this.gameData.onclick();
     };
 
     rmc(event) {
@@ -71,7 +101,14 @@ class Sapper {
                 this.setClass(cellEl, 'closed');
             }
         }
-        this.checkWin();
+        this.getProgress();
+        if (this.checkWin()) {
+            this.handEvent = 'win';
+        }
+
+        // console.log(Math.ceil(this.gameProgress)) // Показывает прогресс
+
+        this.gameData.setAttribute('event', `${this.handEvent}`);
     };
 
     bombGenerator() {
@@ -118,53 +155,41 @@ class Sapper {
 
     getNearCells(num) {
         const result = [];
-        // result.push(
-        //     num + 12,
-        //     num - 12,
-        // );
-        if (num % 12 === 0) {
+        if (num % this.fieldLine === 0) {
             result.push(
-                num - 12 - 1,
-                num - 12,
+                num - this.fieldLine - 1,
+                num - this.fieldLine,
                 -1,
                 num - 1,
                 0,
                 -1,
-                num + 12 - 1,
-                num + 12,
+                num + this.fieldLine - 1,
+                num + this.fieldLine,
                 -1,
-
-                // num - 1,
-                // num + 12 - 1,
-                // num - 12 - 1,
             );
-        } else if ((num + 11) % 12 === 0) {
+        } else if ((num + this.fieldLine - 1) % this.fieldLine === 0) {
             result.push(
                 -1,
-                num - 12,
-                num - 12 + 1,
+                num - this.fieldLine,
+                num - this.fieldLine + 1,
                 -1,
                 0,
                 num + 1,
                 -1,
-                num + 12,
-                num + 12 + 1,
-
-                // num + 1,
-                // num + 12 + 1,
-                // num - 12 + 1,
+                num + this.fieldLine,
+                num + this.fieldLine + 1,
             );
         } else {
             result.push(
-                num - 12 - 1,
-                num - 12,
-                num - 12 + 1,
+                num - this.fieldLine - 1,
+                num - this.fieldLine,
+                num - this.fieldLine + 1,
                 num - 1,
                 0,
                 num + 1,
-                num + 12 - 1,
-                num + 12,
-                num + 12 + 1,
+                num + this.fieldLine - 1,
+                num + this.fieldLine,
+                num + this.fieldLine + 1,
             );
 
         }
@@ -183,6 +208,7 @@ class Sapper {
             }
             if (!this.field[num].bomb) {
                 this.setClass(this.getCellById(num), 'open');
+
                 if (this.field[num].count) {
                     this.showCount(this.getCellById(num), this.field[num].count);
                 } else {
@@ -207,6 +233,7 @@ class Sapper {
             }
         }
         this.gameWin();
+        return true;
     };
 
     gameLose() {
@@ -256,17 +283,35 @@ class Sapper {
         }
     };
 
+    getProgress() {
+        let openCells = 0
+        for (let id = 1; id < this.fieldSize; id++) {
+            const cellEl = this.getCellById(id);
+            if (cellEl.className === 'flag' || cellEl.className === 'open' || cellEl.className === 'bomb') {
+                openCells++;
+            }
+        }
+        this.gameProgress = openCells / this.fieldSize * 100;
+
+        if (this.gameProgress >= 50 && this.fifty) {
+            this.health++
+            this.fifty = false;
+        }
+        if (this.gameProgress >= 75 && this.seventyFive) {
+            this.health++
+            this.seventyFive = false;
+        }
+    };
+
     setCellBg(id) {
 
     };
 
     getNearArr(id) {
         const flat = [];
-        for (const num of getNearCells(id)) {
+        for (const num of this.getNearCells(id)) {
 
-            // (num === 0 || getCellById(num).className !== 'close') ? flat.push(0) : flat.push(1);
-
-            if (num === 0 || getCellById(num).className !== 'close') {
+            if (num === 0 || this.getCellById(num).className !== 'close') {
                 flat.push(0);
             } else {
                 flat.push(1);
@@ -274,8 +319,8 @@ class Sapper {
         }
 
         const result = flat.slice(0, 3);
-        result[3] = a.slice(3, 6);
-        result[3][3] = a.slice(-3);
+        result[3] = flat.slice(3, 6);
+        result[3][3] = flat.slice(-3);
         return result;
     };
 
@@ -283,7 +328,7 @@ class Sapper {
         this.init();
         this.bombGenerator();
         this.calculationOfNumbers();
-        // this.showBombs(); // Только для тестов. Показывает бомбы
+        this.showBombs(); // Только для тестов. Показывает бомбы
     };
 
     showBombs() {
@@ -297,5 +342,5 @@ class Sapper {
     }; // Только для тестов. Показывает бомбы
 }
 
-const sapper = new Sapper(12, 20);
+const sapper = new Sapper(12, 1);
 sapper.run();
