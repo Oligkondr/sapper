@@ -36,4 +36,14 @@ for (let i = 0; i < second.length; i++) {
 
 let h = 0.69
 const j = 0.69
-console.log(h += j)
+// console.log(h += j)
+
+const q = {34: {bomb: true}};
+const w = 34
+// console.log(q[w]);
+// console.log(Object.hasOwn(q, 34));
+
+const e = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+for (const id of e) {
+    console.log(id)
+}
