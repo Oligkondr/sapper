@@ -23,27 +23,32 @@ b[3][3] = a.slice(-3);
 const result = a.slice(0, 3);
 const second = a.slice(3);
 for (let i = 0; i < second.length; i++) {
-    if (i % 3 === 0) {
-        result[3] = [];
-        result[3].push(second[i]);
-    } else if (i === 5) {
-        result[3][3] = [];
-        result[3][3].push(second[i]);
-    }
+  if (i % 3 === 0) {
+    result[3] = [];
+    result[3].push(second[i]);
+  } else if (i === 5) {
+    result[3][3] = [];
+    result[3][3].push(second[i]);
+  }
 }
 // console.log(result);
 
-
-let h = 0.69
-const j = 0.69
+let h = 0.69;
+const j = 0.69;
 // console.log(h += j)
 
-const q = {34: {bomb: true}};
-const w = 34
+const q = { 34: { bomb: true } };
+const w = 34;
 // console.log(q[w]);
 // console.log(Object.hasOwn(q, 34));
 
-const e = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+const e = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 for (const id of e) {
-    console.log(id)
+  // console.log(id)
 }
+
+const r = [1, 'empty', 3, 4, 5];
+const t = [...r]
+console.log(r);
+console.log(t);
+console.log(t === r);

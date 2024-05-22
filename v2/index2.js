@@ -53,7 +53,7 @@ class Sapper {
 
     // Начало игры. Первое нажатие.
     if (this.firsClick) {
-      const safe = this.getNearCells(cellEl.num);
+      const safe = this.getNearCells(cellEl.num)[1];
       safe.push(cellEl.num);
 
       this.bombGenerator(safe);
@@ -97,9 +97,9 @@ class Sapper {
     }
 
     console.log(this.getNearArr(cellEl.num)); // Показывает результат GetNearArr
-    console.log(Math.ceil(this.gameProgress) + '% open'); // Показывает прогресс
-    console.log(this.health + ' health left'); // Показывает "здоровье"
-    console.log('last cell is - ' + this.lastCell); // Показывает последнюю нажатую клетку
+    // console.log(Math.ceil(this.gameProgress) + '% open'); // Показывает прогресс
+    // console.log(this.health + ' health left'); // Показывает "здоровье"
+    // console.log('last cell is - ' + this.lastCell); // Показывает последнюю нажатую клетку
 
     this.gameData.setAttribute('cells-closed', `${Math.ceil(this.gameProgress)}`);
     this.gameData.setAttribute('event', `${this.handEvent}`);
@@ -169,7 +169,7 @@ class Sapper {
       //   }
       // }
 
-      this.field[i].count = this.getNearCells(i)
+      this.field[i].count = this.getNearCells(i)[1]
         .reduce((acc, num) => {
           if (this.field[num].bomb) {
             acc++;
@@ -182,14 +182,46 @@ class Sapper {
   getNearCells (num) {
     const result = [];
     if (num % this.fieldLine === 0) {
-      result.push(num - this.fieldLine - 1, num - this.fieldLine, -1, -1, -1, num + this.fieldLine, num + this.fieldLine - 1, num - 1);
+      result.push(
+        num - this.fieldLine,
+        'empty',
+        'empty',
+        'empty',
+        num + this.fieldLine,
+        num + this.fieldLine - 1,
+        num - 1,
+        num - this.fieldLine - 1,
+      );
     } else if ((num + this.fieldLine - 1) % this.fieldLine === 0) {
-      result.push(-1, num - this.fieldLine, num - this.fieldLine + 1, num + 1, num + this.fieldLine + 1, num + this.fieldLine, -1, -1);
+      result.push(
+        num - this.fieldLine,
+        num - this.fieldLine + 1,
+        num + 1,
+        num + this.fieldLine + 1,
+        num + this.fieldLine,
+        'empty',
+        'empty',
+        'empty',
+      );
     } else {
-      result.push(num - this.fieldLine - 1, num - this.fieldLine, num - this.fieldLine + 1, num + 1, num + this.fieldLine + 1, num + this.fieldLine, num + this.fieldLine - 1, num - 1);
-
+      result.push(
+        num - this.fieldLine,
+        num - this.fieldLine + 1,
+        num + 1,
+        num + this.fieldLine + 1,
+        num + this.fieldLine,
+        num + this.fieldLine - 1,
+        num - 1,
+        num - this.fieldLine - 1,
+      );
     }
-    return result.filter((num) => num >= 1 && num <= this.fieldSize);
+
+    const clear = [...result]
+      .map((el) => el < 0 || el > this.fieldSize
+        ? 'empty'
+        : el);
+
+    return [clear, result.filter((num) => num >= 1 && num <= this.fieldSize)];
   };
 
   getCellById (id) {
@@ -198,7 +230,7 @@ class Sapper {
 
   openEmpty (cellNum) {
     this.field[cellNum].open = true;
-    for (const num of this.getNearCells(cellNum)) {
+    for (const num of this.getNearCells(cellNum)[1]) {
       if (this.field[num].open) {
         continue;
       }
@@ -320,18 +352,20 @@ class Sapper {
   /**
    * @param {number} id - id клетки
    * @returns {*[]} - Массив соседних клеток.
-   * Расположены по часовой стрелке, начиная с верхней левой.
-   * Последнее чело - "хозяин" соседей.
+   * Расположены по часовой стрелке, начиная с верхней посередине.
    * -----------
-   * 1, 2, 3,
-   * 8, 9, 4,
-   * 7, 6, 5
+   * 8, 1, 2,
+   * 7, X, 3,
+   * 6, 5, 4
    */
   getNearArr (id) {
     const flat = [];
-    for (const num of this.getNearCells(id)) {
 
-      if (this.getCellById(num).className === 'closed') {
+    console.log(this.getNearCells(id)[0]);
+
+    for (const num of this.getNearCells(id)[0]) {
+
+      if (num === 'empty' || this.getCellById(num).className === 'closed') {
         flat.push(1);
       } else {
         flat.push(0);
@@ -341,8 +375,6 @@ class Sapper {
     // const result = flat.slice(0, 3);
     // result[3] = flat.slice(3, 6);
     // result[3][3] = flat.slice(-3);
-
-    flat.push(0);
 
     return flat;
   };
