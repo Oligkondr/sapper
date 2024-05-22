@@ -134,8 +134,7 @@ class Sapper {
 
     this.gameData.setAttribute('event', `${this.handEvent}`);
 
-    console.log(Math.ceil(this.gameProgress) + '% open'); // Показывает прогресс
-    console.log('last cell is - ' + this.lastCell); // Показывает последнюю нажатую клетку
+    // console.log('last cell is - ' + this.lastCell); // Показывает последнюю нажатую клетку
   };
 
   bombGenerator (safe) {
@@ -161,13 +160,6 @@ class Sapper {
       if (this.field[i].bomb) {
         continue;
       }
-
-      // let count = 0;
-      // for (const num of this.getNearCells(i)) {
-      //   if (this.field[num].bomb) {
-      //     count++;
-      //   }
-      // }
 
       this.field[i].count = this.getNearCells(i)[1]
         .reduce((acc, num) => {
@@ -230,10 +222,13 @@ class Sapper {
 
   openEmpty (cellNum) {
     this.field[cellNum].open = true;
+
     for (const num of this.getNearCells(cellNum)[1]) {
+
       if (this.field[num].open) {
         continue;
       }
+
       if (!this.field[num].bomb) {
         this.setClass(this.getCellById(num), 'open');
 
@@ -277,11 +272,11 @@ class Sapper {
 
   gameLose () {
     this.isGameOver = true;
-
     alert('Game over! You lose.');
 
     for (const cell in this.field) {
       const el = document.getElementById(`cell_${cell}`);
+
       if (this.field[cell].bomb) {
         this.setClass(el, 'bomb');
         el.innerText = '*';
@@ -291,7 +286,6 @@ class Sapper {
 
   gameWin () {
     this.isGameOver = true;
-
     alert('Game over! Tou win');
   };
 
@@ -327,18 +321,21 @@ class Sapper {
 
   getProgress () {
     let openCells = 0;
+
     for (let id = 1; id < this.fieldSize; id++) {
       const cellEl = this.getCellById(id);
       if (cellEl.className === 'open') {
         openCells++;
       }
     }
+
     this.gameProgress = openCells / (this.fieldSize - this.bombCount) * 100;
 
     if (this.gameProgress >= 50 && this.fifty) {
       this.fifty = false;
       this.health++;
     }
+
     if (this.gameProgress >= 75 && this.seventyFive) {
       this.seventyFive = false;
       this.health++;
@@ -352,7 +349,7 @@ class Sapper {
   /**
    * @param {number} id - id клетки
    * @returns {*[]} - Массив соседних клеток.
-   * Расположены по часовой стрелке, начиная с верхней посередине.
+   * Они расположены по часовой стрелке, начиная с верхней посередине.
    * -----------
    * 8, 1, 2,
    * 7, X, 3,
@@ -360,8 +357,6 @@ class Sapper {
    */
   getNearArr (id) {
     const flat = [];
-
-    console.log(this.getNearCells(id)[0]);
 
     for (const num of this.getNearCells(id)[0]) {
 
@@ -371,10 +366,6 @@ class Sapper {
         flat.push(0);
       }
     }
-
-    // const result = flat.slice(0, 3);
-    // result[3] = flat.slice(3, 6);
-    // result[3][3] = flat.slice(-3);
 
     return flat;
   };
