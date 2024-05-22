@@ -31,8 +31,8 @@ class Sapper {
       divEl.id = `cell_${i + 1}`;
       divEl.num = i + 1;
 
-      divEl.addEventListener('click', (event) => this.lmc(event));
-      divEl.addEventListener('contextmenu', (event) => this.rmc(event));
+      divEl.addEventListener('click', (event) => this.leftMouseClick(event));
+      divEl.addEventListener('contextmenu', (event) => this.rightMouseClick(event));
 
       this.mainGridEl.appendChild(divEl);
     }
@@ -42,7 +42,7 @@ class Sapper {
     }
   };
 
-  lmc (event) {
+  leftMouseClick (event) {
 
     if (this.isGameOver) {
       return false;
@@ -51,6 +51,7 @@ class Sapper {
     const cellEl = event.target;
     const cell = this.field[cellEl.num];
 
+    // Начало игры. Первое нажатие.
     if (this.firsClick) {
       const safe = this.getNearCells(cellEl.num);
       safe.push(cellEl.num);
@@ -65,8 +66,7 @@ class Sapper {
     if (cellEl.className !== 'open' && cellEl.className !== 'flag') {
       if (cell.bomb) {
         this.health -= 1;
-
-        this.lastCell = cellEl.num; // in progress
+        this.lastCell = cellEl.num;
 
         if (this.health < 0) {
           this.handEvent = `loose;cell${this.lastCell}`;
@@ -80,8 +80,7 @@ class Sapper {
 
       } else {
         this.setClass(cellEl, 'open');
-
-        this.lastCell = cellEl.num; // in progress
+        this.lastCell = cellEl.num;
 
         if (cell.count) {
           this.showCount(cellEl, cell.count);
@@ -97,17 +96,19 @@ class Sapper {
       this.handEvent = 'win';
     }
 
+    console.log(this.getNearArr(cellEl.num)); // Показывает результат GetNearArr
     console.log(Math.ceil(this.gameProgress) + '% open'); // Показывает прогресс
     console.log(this.health + ' health left'); // Показывает "здоровье"
-    console.log('last cell is - ' + this.lastCell); // Показывает последнюю тыкнутую клетку
+    console.log('last cell is - ' + this.lastCell); // Показывает последнюю нажатую клетку
 
     this.gameData.setAttribute('cells-closed', `${Math.ceil(this.gameProgress)}`);
     this.gameData.setAttribute('event', `${this.handEvent}`);
+    this.handEvent = '';
     this.gameData.setAttribute('curr-health', `${this.health}`);
     // this.gameData.onclick();
   };
 
-  rmc (event) {
+  rightMouseClick (event) {
     event.preventDefault();
 
     if (this.isGameOver) {
@@ -115,7 +116,6 @@ class Sapper {
     }
 
     const cellEl = event.target;
-
     this.lastCell = cellEl.num;
 
     if (cellEl.className !== 'open') {
@@ -135,7 +135,7 @@ class Sapper {
     this.gameData.setAttribute('event', `${this.handEvent}`);
 
     console.log(Math.ceil(this.gameProgress) + '% open'); // Показывает прогресс
-    console.log('last cell is - ' + this.lastCell); // Показывает последнюю тыкнутую клетку
+    console.log('last cell is - ' + this.lastCell); // Показывает последнюю нажатую клетку
   };
 
   bombGenerator (safe) {
@@ -161,55 +161,32 @@ class Sapper {
       if (this.field[i].bomb) {
         continue;
       }
-      let count = 0;
-      for (const num of this.getNearCells(i)) {
-        if (this.field[num].bomb) {
-          count++;
-        }
-      }
 
-      this.field[i].count = count;
+      // let count = 0;
+      // for (const num of this.getNearCells(i)) {
+      //   if (this.field[num].bomb) {
+      //     count++;
+      //   }
+      // }
+
+      this.field[i].count = this.getNearCells(i)
+        .reduce((acc, num) => {
+          if (this.field[num].bomb) {
+            acc++;
+          }
+          return acc;
+        }, 0);
     }
   };
 
   getNearCells (num) {
     const result = [];
     if (num % this.fieldLine === 0) {
-      result.push(
-        num - this.fieldLine - 1,
-        num - this.fieldLine,
-        -1,
-        num - 1,
-        0,
-        -1,
-        num + this.fieldLine - 1,
-        num + this.fieldLine,
-        -1,
-      );
+      result.push(num - this.fieldLine - 1, num - this.fieldLine, -1, -1, -1, num + this.fieldLine, num + this.fieldLine - 1, num - 1);
     } else if ((num + this.fieldLine - 1) % this.fieldLine === 0) {
-      result.push(
-        -1,
-        num - this.fieldLine,
-        num - this.fieldLine + 1,
-        -1,
-        0,
-        num + 1,
-        -1,
-        num + this.fieldLine,
-        num + this.fieldLine + 1,
-      );
+      result.push(-1, num - this.fieldLine, num - this.fieldLine + 1, num + 1, num + this.fieldLine + 1, num + this.fieldLine, -1, -1);
     } else {
-      result.push(
-        num - this.fieldLine - 1,
-        num - this.fieldLine,
-        num - this.fieldLine + 1,
-        num - 1,
-        0,
-        num + 1,
-        num + this.fieldLine - 1,
-        num + this.fieldLine,
-        num + this.fieldLine + 1,
-      );
+      result.push(num - this.fieldLine - 1, num - this.fieldLine, num - this.fieldLine + 1, num + 1, num + this.fieldLine + 1, num + this.fieldLine, num + this.fieldLine - 1, num - 1);
 
     }
     return result.filter((num) => num >= 1 && num <= this.fieldSize);
@@ -259,6 +236,7 @@ class Sapper {
         openCells++;
       }
     }
+
     if (openCells === this.fieldSize - this.bombCount) {
       this.gameWin();
       return true;
@@ -267,7 +245,9 @@ class Sapper {
 
   gameLose () {
     this.isGameOver = true;
+
     alert('Game over! You lose.');
+
     for (const cell in this.field) {
       const el = document.getElementById(`cell_${cell}`);
       if (this.field[cell].bomb) {
@@ -279,6 +259,7 @@ class Sapper {
 
   gameWin () {
     this.isGameOver = true;
+
     alert('Game over! Tou win');
   };
 
@@ -323,12 +304,12 @@ class Sapper {
     this.gameProgress = openCells / (this.fieldSize - this.bombCount) * 100;
 
     if (this.gameProgress >= 50 && this.fifty) {
-      this.health++;
       this.fifty = false;
+      this.health++;
     }
     if (this.gameProgress >= 75 && this.seventyFive) {
-      this.health++;
       this.seventyFive = false;
+      this.health++;
     }
   };
 
@@ -336,21 +317,34 @@ class Sapper {
 
   };
 
+  /**
+   * @param {number} id - id клетки
+   * @returns {*[]} - Массив соседних клеток.
+   * Расположены по часовой стрелке, начиная с верхней левой.
+   * Последнее чело - "хозяин" соседей.
+   * -----------
+   * 1, 2, 3,
+   * 8, 9, 4,
+   * 7, 6, 5
+   */
   getNearArr (id) {
     const flat = [];
     for (const num of this.getNearCells(id)) {
 
-      if (num === 0 || this.getCellById(num).className !== 'close') {
-        flat.push(0);
-      } else {
+      if (this.getCellById(num).className === 'closed') {
         flat.push(1);
+      } else {
+        flat.push(0);
       }
     }
 
-    const result = flat.slice(0, 3);
-    result[3] = flat.slice(3, 6);
-    result[3][3] = flat.slice(-3);
-    return result;
+    // const result = flat.slice(0, 3);
+    // result[3] = flat.slice(3, 6);
+    // result[3][3] = flat.slice(-3);
+
+    flat.push(0);
+
+    return flat;
   };
 
   /**
