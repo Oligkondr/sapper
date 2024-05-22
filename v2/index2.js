@@ -209,11 +209,37 @@ class Sapper {
     }
 
     const clear = [...result]
-      .map((el) => el < 0 || el > this.fieldSize
+      .map((el) => el <= 0 || el > this.fieldSize
         ? 'empty'
         : el);
 
     return [clear, result.filter((num) => num >= 1 && num <= this.fieldSize)];
+  };
+
+  /**
+   * @param {number} id - id клетки
+   * @returns {*[]} - Массив соседних клеток.
+   * Они расположены по часовой стрелке, начиная с верхней посередине.
+   * -----------
+   * 8, 1, 2,
+   * 7, X, 3,
+   * 6, 5, 4
+   */
+  getNearArr (id) {
+    const flat = [];
+
+    console.log(this.getNearCells(id)[0]);
+
+    for (const num of this.getNearCells(id)[0]) {
+
+      if (num === 'empty' || this.getCellById(num).className === 'closed') {
+        flat.push(1);
+      } else {
+        flat.push(0);
+      }
+    }
+
+    return flat;
   };
 
   getCellById (id) {
@@ -344,30 +370,6 @@ class Sapper {
 
   setCellBg (id) {
 
-  };
-
-  /**
-   * @param {number} id - id клетки
-   * @returns {*[]} - Массив соседних клеток.
-   * Они расположены по часовой стрелке, начиная с верхней посередине.
-   * -----------
-   * 8, 1, 2,
-   * 7, X, 3,
-   * 6, 5, 4
-   */
-  getNearArr (id) {
-    const flat = [];
-
-    for (const num of this.getNearCells(id)[0]) {
-
-      if (num === 'empty' || this.getCellById(num).className === 'closed') {
-        flat.push(1);
-      } else {
-        flat.push(0);
-      }
-    }
-
-    return flat;
   };
 
   /**
