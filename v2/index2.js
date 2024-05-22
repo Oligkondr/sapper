@@ -8,7 +8,7 @@ class Sapper {
   fifty = true;
   seventyFive = true;
   handEvent = '';
-  lastCell; // Последняя открытая ячейка
+  lastCell;
   firsClick = true;
 
   constructor (fieldLine, bombCount) {
@@ -116,7 +116,7 @@ class Sapper {
 
     const cellEl = event.target;
 
-    this.lastCell = cellEl.num; // in progress
+    this.lastCell = cellEl.num;
 
     if (cellEl.className !== 'open') {
       if (cellEl.className !== 'flag') {
@@ -134,6 +134,7 @@ class Sapper {
 
     this.gameData.setAttribute('event', `${this.handEvent}`);
 
+    console.log(Math.ceil(this.gameProgress) + '% open'); // Показывает прогресс
     console.log('last cell is - ' + this.lastCell); // Показывает последнюю тыкнутую клетку
   };
 
@@ -315,7 +316,7 @@ class Sapper {
     let openCells = 0;
     for (let id = 1; id < this.fieldSize; id++) {
       const cellEl = this.getCellById(id);
-      if (cellEl.className === 'flag' || cellEl.className === 'open') {
+      if (cellEl.className === 'open') {
         openCells++;
       }
     }
